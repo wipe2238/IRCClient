@@ -2,10 +2,10 @@ cmake_minimum_required( VERSION 3.1.2 )
 
 project( ircclient LANGUAGES CXX )
 
-option( IRCCLIENT_EXAMPLE "Compile example application" OFF )
+option( IRCCLIENT_EXAMPLE "Compile example application" ON )
 
-set( EXAMPLE_SRC  ${PROJECT_SOURCE_DIR}/src )
-set( LIB_SRC      ${PROJECT_SOURCE_DIR}/src )
+set( EXAMPLE_SRC  ${PROJECT_SOURCE_DIR}/example )
+set( LIB_SRC      ${PROJECT_SOURCE_DIR}/lib )
 
 function( set_flags target )
 	set_property( TARGET ${target} PROPERTY CXX_STANDARD 11 )
@@ -57,6 +57,8 @@ if( IRCCLIENT_EXAMPLE )
 		${EXAMPLE_SRC}/Thread.cpp
 		${EXAMPLE_SRC}/Thread.h
 	)
+
+	target_include_directories( ircclient-example PRIVATE ${LIB_SRC} )
 
 	target_link_libraries( ircclient-example
 		Threads::Threads

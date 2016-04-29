@@ -30,7 +30,11 @@ bool IRCSocket::Init()
     }
     #endif
 
-    if ((_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
+    #ifdef _WIN32
+    if ((_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
+    #else
+    if ((_socket = socket(AF_INET, SOCK_STREAM, 0 )) == INVALID_SOCKET)
+    #endif
     {
         std::cout << "Socket error." << std::endl;
         #ifdef _WIN32
@@ -53,8 +57,7 @@ bool IRCSocket::Init()
     u_long mode = 0;
     ioctlsocket(_socket, FIONBIO, &mode);
     #else
-    fcntl(_socket, F_SETFL, O_NONBLOCK);
-    fcntl(_socket, F_SETFL, O_ASYNC);
+    fcntl(_socket, F_SETFL, fcntl(_socket, F_GETFL) | O_ASYNC);
     #endif
 
     return true;
@@ -109,6 +112,34 @@ bool IRCSocket::SendData(char const* data)
     if (_connected)
         if (send(_socket, data, strlen(data), 0) == -1)
             return false;
+
+    return true;
+}
+
+bool IRCSocket::Select( long sec, long usec )
+{
+    timeval tv;
+    tv.tv_sec = sec;
+    tv.tv_usec = usec;
+    FD_ZERO( &_set );
+    FD_ZERO( &_seterr );
+    FD_SET( _socket, &_set );
+    FD_SET( _socket, &_seterr );
+    if( select( (int)_socket + 1, &_set, NULL, &_seterr, &tv ) == SOCKET_ERROR )
+    {
+        // select error
+        return false;
+    }
+    if( FD_ISSET( _socket, &_seterr ))
+    {
+        // socket error
+        return false;
+    }
+    if( !FD_ISSET( _socket, &_set ))
+    {
+        // no data
+        return false;
+    }
 
     return true;
 }

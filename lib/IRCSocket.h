@@ -44,9 +44,11 @@ public:
 
     bool SendData(char const* data);
     std::string ReceiveData();
+    bool Select( long sec = 0, long usec = 0 );
 
 private:
     int _socket;
+    fd_set _set, _seterr;
 
     bool _connected;
 };

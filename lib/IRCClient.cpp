@@ -70,13 +70,34 @@ bool IRCClient::Login(std::string nick, std::string user, std::string password)
     return false;
 }
 
-void IRCClient::ReceiveData()
+void IRCClient::ReceiveData( bool blocking, long wait_sec, long wait_usec )
 {
-    std::string buffer = _socket.ReceiveData();
+    if( !blocking && !_socket.Select( wait_sec, wait_usec ))
+        return;
 
-    std::string line;
-    std::istringstream iss(buffer);
-    while(getline(iss, line))
+    static const std::string n = "\n";
+    static std::string buffer;
+
+    buffer += _socket.ReceiveData();
+
+    if( buffer.empty() )
+        return;
+
+    // TODO: [_WIN32] verify http://stackoverflow.com/a/2072890 (remi.chateauneu answer)
+    const bool end_n = std::equal( n.rbegin(), n.rend(), buffer.rbegin() );
+
+    std::vector<std::string> lines = split( buffer, n[0] );
+
+    if( !end_n )
+    {
+        // cache part of the line for next call
+        buffer = lines.back();
+        lines.pop_back();
+    }
+    else
+        buffer.clear();
+
+    for( auto& line : lines )
     {
         if (line.find("\r") != std::string::npos)
             line = line.substr(0, line.size() - 1);

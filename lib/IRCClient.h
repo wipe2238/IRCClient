@@ -88,7 +88,7 @@ public:
 
     bool Login(std::string /*nick*/, std::string /*user*/, std::string /*password*/ = std::string());
 
-    void ReceiveData();
+    void ReceiveData( bool /*blocking*/ = true, long /*wait_sec*/ = 0, long /*wait_usec*/ = 0 );
 
     void HookIRCCommand(std::string /*command*/, void (*function)(IRCMessage /*message*/, IRCClient* /*client*/));
 

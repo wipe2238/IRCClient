@@ -25,6 +25,7 @@ volatile bool running;
 
 void signalHandler(int signal)
 {
+    (void)(signal);
     running = false;
 }
 

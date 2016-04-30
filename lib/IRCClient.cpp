@@ -178,7 +178,7 @@ void IRCClient::Parse(std::string data)
     CallHook(command, ircMessage);
 }
 
-void IRCClient::HookIRCCommand(std::string command, void (*function)(IRCMessage /*message*/, IRCClient* /*client*/))
+void IRCClient::HookIRCCommand(std::string command, IRCHook function )
 {
     IRCCommandHook hook;
 
@@ -193,11 +193,11 @@ void IRCClient::CallHook(std::string command, IRCMessage message)
     if (_hooks.empty())
         return;
 
-    for (std::list<IRCCommandHook>::const_iterator itr = _hooks.begin(); itr != _hooks.end(); ++itr)
+    for( auto& hook : _hooks )
     {
-        if (itr->command == command)
+        if (hook.command == command)
         {
-            (*(itr->function))(message, this);
+            hook.function(message, this);
             break;
         }
     }

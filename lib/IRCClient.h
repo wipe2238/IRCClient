@@ -16,14 +16,17 @@
 #ifndef _IRCCLIENT_H
 #define _IRCCLIENT_H
 
+#include <functional>
 #include <string>
 #include <vector>
 #include <list>
 #include "IRCSocket.h"
 
 class IRCClient;
+struct IRCMessage;
 
 extern std::vector<std::string> split(std::string const&, char);
+typedef std::function<void(IRCMessage,IRCClient*)> IRCHook;
 
 struct IRCCommandPrefix
 {
@@ -68,10 +71,10 @@ struct IRCMessage
 
 struct IRCCommandHook
 {
-    IRCCommandHook() : function(NULL) {};
+    IRCCommandHook() {};
 
     std::string command;
-    void (*function)(IRCMessage /*message*/, IRCClient* /*client*/);
+    IRCHook function;
 };
 
 class IRCClient
@@ -90,7 +93,7 @@ public:
 
     void ReceiveData( bool /*blocking*/ = true, long /*wait_sec*/ = 0, long /*wait_usec*/ = 0 );
 
-    void HookIRCCommand(std::string /*command*/, void (*function)(IRCMessage /*message*/, IRCClient* /*client*/));
+    void HookIRCCommand(std::string /*command*/, IRCHook /*function*/ );
 
     void Parse(std::string /*data*/);
 

@@ -89,7 +89,7 @@ public:
 
     bool SendIRC(std::string /*data*/);
 
-    bool Login(std::string /*nick*/, std::string /*user*/, std::string /*password*/ = std::string());
+    bool Login(std::string /*nick*/, std::string /*user*/, std::string /*realname*/ = std::string(), std::string /*password*/ = std::string());
 
     void ReceiveData( bool /*blocking*/ = true, long /*wait_sec*/ = 0, long /*wait_usec*/ = 0 );
 

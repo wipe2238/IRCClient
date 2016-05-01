@@ -207,15 +207,9 @@ void IRCClient::HookIRCCommand(std::string command, IRCHook function )
 
 void IRCClient::CallHook(std::string command, IRCMessage message)
 {
-    if (_hooks.empty())
-        return;
-
     for( auto& hook : _hooks )
     {
         if (hook.command == command)
-        {
             hook.function(message, this);
-            break;
-        }
     }
 }

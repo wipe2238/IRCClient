@@ -109,6 +109,9 @@ void IRCClient::ReceiveData( bool blocking, long wait_sec, long wait_usec )
 
 void IRCClient::Parse(std::string data)
 {
+    if( data.empty() )
+        return;
+
     std::string original(data);
     IRCCommandPrefix cmdPrefix;
 
@@ -158,11 +161,7 @@ void IRCClient::Parse(std::string data)
     }
 
     if (command == "PING")
-    {
-        std::cout << "Ping? Pong!" << std::endl;
         SendIRC("PONG :" + parameters.at(0));
-        return;
-    }
 
     IRCMessage ircMessage(command, cmdPrefix, parameters);
 

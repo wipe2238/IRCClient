@@ -153,6 +153,11 @@ ThreadReturn inputThread(void* client)
 #endif
 }
 
+void onPing( IRCMessage, IRCClient* )
+{
+    std::cout << "Ping? Pong!" << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc < 3)
@@ -174,6 +179,7 @@ int main(int argc, char* argv[])
     IRCClient client;
 
     client.Debug = true;
+    client.HookIRCCommand( "PING", &onPing );
 
     // Start the input thread
     Thread thread;

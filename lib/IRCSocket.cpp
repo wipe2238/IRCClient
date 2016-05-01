@@ -13,9 +13,13 @@
  * http://www.gnu.org/licenses/lgpl.html 
  */
 
-#include <cstring>
-#include <fcntl.h>
 #include "IRCSocket.h"
+
+#include <cstring>
+#include <iostream>
+#include <string>
+
+#include <fcntl.h>
 
 #define MAXDATASIZE 4096
 
@@ -63,8 +67,14 @@ bool IRCSocket::Init()
     return true;
 }
 
-bool IRCSocket::Connect(char const* host, int port)
+bool IRCSocket::Connect(char const* host, unsigned short port)
 {
+    if( !port )
+    {
+        std::cout << "Invalid port" << std::endl;
+        return( false );
+    }
+
     hostent* he;
 
     if (!(he = gethostbyname(host)))

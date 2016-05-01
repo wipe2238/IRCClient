@@ -20,16 +20,16 @@
 #include <sstream>
 
 #ifdef _WIN32
-#include <winsock2.h>
+ #include <winsock2.h>
 #else
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#define closesocket(s) close(s)
-#define close(s)
-#define SOCKET_ERROR -1
-#define INVALID_SOCKET -1
+ #include <sys/types.h>
+ #include <sys/socket.h>
+ #include <netinet/in.h>
+ #include <netdb.h>
+ #include <unistd.h>
+ #define closesocket(s) close(s)
+ #define SOCKET_ERROR -1
+ #define INVALID_SOCKET -1
 #endif
 
 class IRCSocket
@@ -37,7 +37,7 @@ class IRCSocket
 public:
     bool Init();
 
-    bool Connect(char const* host, int port);
+    bool Connect(char const* host, unsigned short port);
     void Disconnect();
 
     bool Connected() { return _connected; };
@@ -49,7 +49,6 @@ public:
 private:
     int _socket;
     fd_set _set, _seterr;
-
     bool _connected;
 };
 

@@ -15,6 +15,8 @@
 
 #include "IRCHandler.h"
 
+#include <iostream>
+
 IRCCommandHandler ircCommandTable[NUM_IRC_CMDS] =
 {
     { "PRIVMSG",            &IRCClient::HandlePrivMsg                   },

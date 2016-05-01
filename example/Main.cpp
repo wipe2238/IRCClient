@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
 
     IRCClient client;
 
-    client.Debug(true);
+    client.Debug = true;
 
     // Start the input thread
     Thread thread;

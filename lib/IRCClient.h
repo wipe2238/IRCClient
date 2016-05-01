@@ -16,11 +16,13 @@
 #ifndef _IRCCLIENT_H
 #define _IRCCLIENT_H
 
+#include "IRCSocket.h"
+
 #include <functional>
+#include <list>
+#include <ostream>
 #include <string>
 #include <vector>
-#include <list>
-#include "IRCSocket.h"
 
 class IRCClient;
 struct IRCMessage;
@@ -30,9 +32,14 @@ typedef std::function<void(IRCMessage,IRCClient*)> IRCHook;
 
 struct IRCCommandPrefix
 {
+    std::string prefix;
+    std::string nick;
+    std::string user;
+    std::string host;
+
     void Parse(std::string data)
     {
-        if (data == "")
+        if (data.empty())
             return;
 
         prefix = data.substr(1, data.find(" ") - 1);
@@ -52,27 +59,51 @@ struct IRCCommandPrefix
         }
     };
 
-    std::string prefix;
-    std::string nick;
-    std::string user;
-    std::string host;
+    friend std::ostream& operator<<( std::ostream& stream, const IRCCommandPrefix& cmdPrefix )
+    {
+        stream <<  "prefix=" << cmdPrefix.prefix;
+        stream << " nick=" << cmdPrefix.nick;
+        stream << " user=" << cmdPrefix.user;
+        stream << " host=" << cmdPrefix.host;
+
+        return( stream );
+    }
 };
 
 struct IRCMessage
 {
+    std::string command;
+    IRCCommandPrefix prefix;
+    std::vector<std::string> parameters;
+
     IRCMessage();
     IRCMessage(std::string cmd, IRCCommandPrefix p, std::vector<std::string> params) :
         command(cmd), prefix(p), parameters(params) {};
 
-    std::string command;
-    IRCCommandPrefix prefix;
-    std::vector<std::string> parameters;
+    friend std::ostream& operator<<( std::ostream& stream, const IRCMessage& message )
+    {
+        stream <<  "command=" << message.command;
+        stream << " prefix={" << message.prefix << "}";
+        stream << " parameters={";
+
+        bool first = true;
+        for( auto p = message.parameters.begin(); p != message.parameters.end(); ++p )
+        {
+            if( first )
+                first = false;
+            else
+                stream << ",";
+            stream << *p;
+        }
+
+        stream << "}";
+
+        return( stream );
+    }
 };
 
 struct IRCCommandHook
 {
-    IRCCommandHook() {};
-
     std::string command;
     IRCHook function;
 };
@@ -80,10 +111,12 @@ struct IRCCommandHook
 class IRCClient
 {
 public:
-    IRCClient() : _debug(false) {};
+    IRCClient() : Debug(false) {};
+
+    bool Debug;
 
     bool InitSocket();
-    bool Connect(char* /*host*/, int /*port*/);
+    bool Connect(char* /*host*/, unsigned short /*port*/);
     void Disconnect();
     bool Connected() { return _socket.Connected(); };
 
@@ -93,6 +126,7 @@ public:
 
     void ReceiveData( bool /*blocking*/ = true, long /*wait_sec*/ = 0, long /*wait_usec*/ = 0 );
 
+    void HookIRCCommand(unsigned short /*numeric*/, IRCHook /*function*/ );
     void HookIRCCommand(std::string /*command*/, IRCHook /*function*/ );
 
     void Parse(std::string /*data*/);
@@ -108,8 +142,6 @@ public:
     void HandleChannelNamesList(IRCMessage /*message*/);
     void HandleNicknameInUse(IRCMessage /*message*/);
     void HandleServerMessage(IRCMessage /*message*/);
-
-    void Debug(bool debug) { _debug = debug; };
 
 private:
     void HandleCommand(IRCMessage /*message*/);

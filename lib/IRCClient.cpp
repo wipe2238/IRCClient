@@ -13,11 +13,12 @@
  * http://www.gnu.org/licenses/lgpl.html 
  */
 
-#include <iostream>
-#include <algorithm>
 #include "IRCSocket.h"
 #include "IRCClient.h"
 #include "IRCHandler.h"
+
+#include <iostream>
+#include <algorithm>
 
 std::vector<std::string> split(std::string const& text, char sep)
 {
@@ -37,7 +38,7 @@ bool IRCClient::InitSocket()
     return _socket.Init();
 }
 
-bool IRCClient::Connect(char* host, int port)
+bool IRCClient::Connect(char* host, unsigned short port)
 {
     return _socket.Connect(host, port);
 }
@@ -172,11 +173,27 @@ void IRCClient::Parse(std::string data)
         IRCCommandHandler& cmdHandler = ircCommandTable[commandIndex];
         (this->*cmdHandler.handler)(ircMessage);
     }
-    else if (_debug)
+    else if (Debug)
         std::cout << original << std::endl;
 
     // Try to call hook (if any matches)
     CallHook(command, ircMessage);
+}
+
+void IRCClient::HookIRCCommand( unsigned short numeric, IRCHook function )
+{
+    if( !numeric || numeric > 999 )
+        return;
+
+    std::string command;
+    if( numeric < 10 )
+        command += "0";
+    if( numeric < 100 )
+        command += "0";
+
+    command += std::to_string( numeric );
+
+    HookIRCCommand( command, function );
 }
 
 void IRCClient::HookIRCCommand(std::string command, IRCHook function )
